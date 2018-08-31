@@ -38,7 +38,6 @@ public class DynamicSettersActivity extends AppCompatActivity implements OnMonth
     List<HolidaysPojo> holidaysPojosList = new ArrayList<>();
     String mTitle = "Annual day", mEventFromDate = "Events selected";
     String[] monthAndYear = {"17-8-2018", "19-8-2018", "22-8-2018", "25-8-2018", "17-9-2018", "18-9-2018", "22-9-2018" , "22-2-2018" , "22-1-2019" };
-    String changingDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,15 +87,34 @@ public class DynamicSettersActivity extends AppCompatActivity implements OnMonth
         mRecyclerView.setAdapter(mAdapter);
         materialCalendarView.setSelectedDate(calendarInstance);
         materialCalendarView.addDecorator(new EventDecorator(Color.RED, dates));
+        Log.e("info >> ", "onCreate: >> "+ materialCalendarView.getCurrentDate().toString().substring(12,19).split("-")[1]);
+        String[] yearAndMonth = materialCalendarView.getCurrentDate().toString().substring(12,19).split("-");
+
+        List<HolidaysPojo> currentHolidaysList = new ArrayList<>();
+        for (int i = 0; i < holidaysPojosList.size(); i++) {
+            String savedExistDate = holidaysPojosList.get(i).getFullDate();
+            String[] savedExistDateArray = savedExistDate.split("-");
+            if (yearAndMonth[0].equalsIgnoreCase(savedExistDateArray[2]) && savedExistDateArray[1].equalsIgnoreCase(String.valueOf(Integer.parseInt(materialCalendarView.getCurrentDate().toString().substring(12, 19).split("-")[1]) + 1))) {
+                Log.e("info >> ", "onCreate: get full date >> " + holidaysPojosList.get(i).getFullDate());
+                currentHolidaysList.add(new HolidaysPojo(holidaysPojosList.get(i).getTitle(), holidaysPojosList.get(i).getFromDate(), holidaysPojosList.get(i).getToDate(), holidaysPojosList.get(i).getFullDate()));
+            }
+        }
+        if (currentHolidaysList.size() > 0) {
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mAdapter = new HolidaysListRecyclerViewAdapter(currentHolidaysList);
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mRecyclerView.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
         String[] yearAndMonth = date.toString().substring(12,19).split("-");
-        ///
+
         List<HolidaysPojo> currentHolidaysList = new ArrayList<>();
         for (int i = 0; i < holidaysPojosList.size(); i++) {
-            Integer.parseInt(changingDate.split("-")[1]);
             String savedExistDate = holidaysPojosList.get(i).getFullDate();
             String[] savedExistDateArray = savedExistDate.split("-");
             if (yearAndMonth[0].equalsIgnoreCase(savedExistDateArray[2]) && savedExistDateArray[1].equalsIgnoreCase(String.valueOf(Integer.parseInt(date.toString().substring(12,19).split("-")[1])+1))) {
@@ -104,7 +122,6 @@ public class DynamicSettersActivity extends AppCompatActivity implements OnMonth
                 currentHolidaysList.add(new HolidaysPojo(holidaysPojosList.get(i).getTitle(), holidaysPojosList.get(i).getFromDate(), holidaysPojosList.get(i).getToDate(), holidaysPojosList.get(i).getFullDate()));
             }
         }
-        ///
 
         if (currentHolidaysList.size() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
